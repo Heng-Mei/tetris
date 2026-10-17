@@ -11,6 +11,7 @@ import {
 import { createHandling, press, release, tick, resetHandling, onRotate } from './handling.js';
 import { createInput } from './input.js';
 import { buildPanel } from './ui.js';
+import { createRotationEditor } from './rotation-editor.js';
 import { DEFAULT_BINDINGS, loadSettings, saveSettings, getSystem } from './settings.js';
 import { createRenderer } from './render.js';
 
@@ -181,11 +182,20 @@ const handlers = {
 
 const input = createInput(settings, handlers);
 
-buildPanel(dom.panelBody, {
+const editor = createRotationEditor({
+  settings,
+  onApply() {
+    system = getSystem(settings);
+    panelUi.render();
+  },
+});
+
+const panelUi = buildPanel(dom.panelBody, {
   settings,
   input,
   defaultBindings: DEFAULT_BINDINGS,
   onClose: () => togglePanel(false),
+  onEditRotation: () => editor.open(),
   onChange() {
     saveSettings(settings);
     system = getSystem(settings);

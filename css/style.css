@@ -366,21 +366,6 @@ select {
 
 .key-btn.waiting { border-color: var(--accent); color: var(--accent); }
 
-.json {
-  width: 100%;
-  min-height: 130px;
-  resize: vertical;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: #0a1017;
-  color: #cfe0f5;
-  padding: 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  line-height: 1.5;
-  margin-bottom: 8px;
-}
-
 .toast {
   position: absolute;
   left: 18px;
@@ -405,6 +390,141 @@ select {
 }
 
 .toast.show { opacity: 1; transform: translateY(0); }
+
+/* 旋转系统图形编辑器 */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 6, 10, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.modal[hidden] { display: none; }
+
+.modal-card {
+  position: relative;
+  width: min(560px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-head h2 { margin: 0; font-size: 15px; letter-spacing: 0.04em; }
+
+.modal-body {
+  padding: 12px 18px 18px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+.modal-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.spacer { flex: 1; }
+
+.modal-title {
+  margin: 18px 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.seg { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 10px; }
+
+.seg-btn {
+  border: 1px solid var(--line);
+  background: #121a26;
+  color: #c9d6e8;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seg-btn.on {
+  border-color: var(--accent);
+  color: #04121a;
+  background: var(--accent);
+}
+
+.seg-btn[data-piece] { color: var(--piece); }
+.seg-btn[data-piece].on { color: #04121a; }
+
+.shape-editor { display: flex; gap: 20px; align-items: flex-start; }
+
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 188px;
+  flex: 0 0 auto;
+}
+
+.shape-cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #0c121c;
+  cursor: pointer;
+  padding: 0;
+}
+
+.shape-cell.on {
+  background: var(--piece);
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.shape-meta { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.shape-meta .muted { font-size: 11px; }
+.shape-meta .row.tight { justify-content: flex-start; gap: 10px; }
+.row.tight { padding: 2px 0; }
+.nowrap { white-space: nowrap; }
+
+.text-input,
+.num-input {
+  background: #0a1017;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.text-input { flex: 1; min-width: 0; }
+.num-input { width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+
+.kick-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.kick-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+
+.muted.small { font-size: 10px; line-height: 1.5; margin: 0 0 4px; }
 
 @media (max-width: 900px) {
   .app { padding: 12px; }

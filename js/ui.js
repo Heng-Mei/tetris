@@ -6,12 +6,11 @@ import {
   exportSettings,
   importSettings,
   saveSettings,
-  validateCustomRotation,
 } from './settings.js';
 import { keyLabel } from './input.js';
 
 export function buildPanel(root, opts) {
-  const { settings, input, onChange, onClose, onSystemDirty } = opts;
+  const { settings, input, onChange, onClose, onSystemDirty, onEditRotation } = opts;
 
   function toast(message, ok = false) {
     const node = root.querySelector('.toast');
@@ -73,10 +72,9 @@ export function buildPanel(root, opts) {
           </section>`).join('')}
 
         <section class="pgroup">
-          <h3>自定义旋转系统（JSON）</h3>
-          <p class="muted">形状坐标以盒内左上角为原点；kicks 按数组顺序尝试。应用后会切换到 Custom。</p>
-          <textarea class="json" spellcheck="false" placeholder='{"name":"My","shapes":{...},"spawn":{...},"kicks":{...}}'>${settings.customRotation ? JSON.stringify(settings.customRotation, null, 2) : ''}</textarea>
-          <button class="btn small" data-apply-rotation>应用 JSON</button>
+          <h3>自定义旋转系统</h3>
+          <p class="muted">图形化编辑 7 个方块的 4 个旋转状态、出生位置与踢墙表；导入/导出为 JSON 文件。</p>
+          <button class="btn small" data-edit-rotation>打开编辑器</button>
         </section>
 
         <section class="pgroup">
@@ -156,22 +154,7 @@ export function buildPanel(root, opts) {
       });
     });
 
-    root.querySelector('[data-apply-rotation]').addEventListener('click', () => {
-      const text = root.querySelector('.json').value.trim();
-      try {
-        if (!text) throw new Error('请先粘贴 JSON');
-        const system = validateCustomRotation(JSON.parse(text));
-        settings.customRotation = system;
-        settings.rotationSystem = 'custom';
-        saveSettings(settings);
-        onChange('rotationSystem', 'custom');
-        onSystemDirty();
-        render();
-        toast('自定义旋转系统已生效', true);
-      } catch (err) {
-        toast(err.message || '解析失败');
-      }
-    });
+    root.querySelector('[data-edit-rotation]').addEventListener('click', () => onEditRotation());
 
     root.querySelector('[data-export]').addEventListener('click', () => exportSettings(settings));
 
