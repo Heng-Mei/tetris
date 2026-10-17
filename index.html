@@ -12,6 +12,21 @@
     <header class="topbar">
       <div class="brand">TETRIS<span>modern</span></div>
       <div class="controls">
+        <label class="pick">模式
+          <select id="modeSelect">
+            <option value="marathon">Marathon</option>
+            <option value="sprint">Sprint 40L</option>
+            <option value="blitz">Blitz 2:00</option>
+            <option value="vs">VS AI</option>
+          </select>
+        </label>
+        <label class="pick" id="aiWrap" hidden>AI
+          <select id="aiSelect">
+            <option value="easy">简单</option>
+            <option value="normal">普通</option>
+            <option value="hard">困难</option>
+          </select>
+        </label>
         <button id="startBtn" class="btn primary">开始</button>
         <button id="pauseBtn" class="btn">暂停</button>
         <button id="restartBtn" class="btn">重开</button>
@@ -32,6 +47,8 @@
           <div><span>时间</span><b id="time">0:00</b></div>
           <div><span>PPS</span><b id="pps">0.00</b></div>
           <div><span>B2B</span><b id="b2b">—</b></div>
+          <div id="attackRow" hidden><span>攻击</span><b id="attack">0</b></div>
+          <div id="incomingRow" hidden><span>待接收</span><b id="incoming">0</b></div>
         </section>
       </aside>
 
@@ -50,6 +67,14 @@
         <section class="box">
           <h2>NEXT</h2>
           <canvas id="next"></canvas>
+        </section>
+        <section class="box vs" id="vsBox" hidden>
+          <h2>AI <span id="aiLabel">普通</span></h2>
+          <canvas id="opponent" aria-label="对手棋盘"></canvas>
+          <div class="vs-stats">
+            <div><span>AI 待接收</span><b id="oppIncoming">0</b></div>
+            <div><span>AI 攻击</span><b id="oppSent">0</b></div>
+          </div>
         </section>
         <section class="box hint">
           <h2>手感</h2>

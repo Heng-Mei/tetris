@@ -14,6 +14,8 @@ import { buildPanel } from './ui.js';
 import { createRotationEditor } from './rotation-editor.js';
 import { DEFAULT_BINDINGS, loadSettings, saveSettings, getSystem } from './settings.js';
 import { createRenderer } from './render.js';
+import { AI_PROFILES } from './ai.js';
+import { MODES } from './modes.js';
 
 const STEP = 1000 / 60;
 
@@ -42,6 +44,18 @@ const dom = {
   panelBtn: document.getElementById('panelBtn'),
   panel: document.getElementById('panel'),
   panelBody: document.getElementById('panelBody'),
+  modeSelect: document.getElementById('modeSelect'),
+  aiSelect: document.getElementById('aiSelect'),
+  aiWrap: document.getElementById('aiWrap'),
+  attackRow: document.getElementById('attackRow'),
+  incomingRow: document.getElementById('incomingRow'),
+  attack: document.getElementById('attack'),
+  incoming: document.getElementById('incoming'),
+  vsBox: document.getElementById('vsBox'),
+  aiLabel: document.getElementById('aiLabel'),
+  opponent: document.getElementById('opponent'),
+  oppIncoming: document.getElementById('oppIncoming'),
+  oppSent: document.getElementById('oppSent'),
 };
 
 const renderer = createRenderer(dom);
@@ -51,6 +65,7 @@ let paused = false;
 let softHeld = false;
 let flash = 0;
 let acc = 0;
+let modeClock = 0;
 let lastTime = performance.now();
 
 function showOverlay(title, text, button) {
@@ -242,12 +257,27 @@ function formatTime(ms) {
 
 function updateHud() {
   dom.score.textContent = game.score.toLocaleString('en-US');
-  dom.lines.textContent = String(game.lines);
+  dom.lines.textContent =
+    settings.mode === 'sprint' ? `${Math.min(game.lines, 40)} / 40` : String(game.lines);
   dom.level.textContent = String(game.level);
-  dom.time.textContent = formatTime(game.time);
+  const isBlitz = settings.mode === 'blitz';
+  dom.time.textContent = formatTime(
+    isBlitz ? Math.max(0, MODES.blitz.duration - modeClock) : modeClock,
+  );
   const seconds = game.time / 1000;
   dom.pps.textContent = seconds > 0.5 ? (game.pieces / seconds).toFixed(2) : '0.00';
   dom.b2b.textContent = game.b2b ? 'B2B' : '—';
+}
+
+function refreshModeUi() {
+  const isVs = settings.mode === 'vs';
+  dom.aiWrap.hidden = !isVs;
+  dom.vsBox.hidden = !isVs;
+  dom.attackRow.hidden = !isVs;
+  dom.incomingRow.hidden = !isVs;
+  dom.modeSelect.value = settings.mode;
+  dom.aiSelect.value = settings.aiDifficulty;
+  dom.aiLabel.textContent = AI_PROFILES[settings.aiDifficulty]?.label || '普通';
 }
 
 function frame(now) {
@@ -278,6 +308,7 @@ function frame(now) {
 window.addEventListener('resize', () => renderer.resize());
 renderer.resize();
 updatePauseLabel();
+refreshModeUi();
 showOverlay('准备好了？', '按 Enter 开始 · 设置里可以调手感与旋转', '开始');
 requestAnimationFrame(frame);
 
