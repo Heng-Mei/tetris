@@ -41,3 +41,10 @@ test('校验会取整、夹取并补齐缺省字段', () => {
   assert.equal(t.name, 'X');
   assert.throws(() => validateAttackTable(null));
 });
+
+test('未经校验的原始攻击表也不会产生 NaN 或字符串拼接', () => {
+  assert.equal(computeAttack(plain(1), { base: {}, b2b: 0, combo: [0] }), 0);
+  assert.equal(computeAttack(plain(1), { base: { single: '4' }, b2b: 0, combo: ['1'] }), 5);
+  const huge = computeAttack(plain(4), { base: { tetris: 1e309 }, b2b: 1e309, combo: [1e309] });
+  assert.ok(Number.isFinite(huge) && huge >= 0);
+});

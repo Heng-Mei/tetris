@@ -86,25 +86,32 @@ export function validateAttackTable(input) {
   return out;
 }
 
+function toFinite(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export function computeAttack(info, table) {
-  const lines = Math.max(0, Math.floor(info?.lines || 0));
+  const lines = Math.max(0, Math.floor(toFinite(info?.lines)));
   if (!lines) return 0;
   const t = table || ATTACK_PRESETS.guideline;
-  const base = t.base;
+  const base = t.base || {};
+  const field = (key) => toFinite(base[key]);
   let value;
   if (info.tspin) {
     value = info.tspin.mini
       ? lines >= 2
-        ? base.tspinDouble
-        : base.tspinMini
-      : [0, base.tspinSingle, base.tspinDouble, base.tspinTriple][Math.min(lines, 3)];
+        ? field('tspinDouble')
+        : field('tspinMini')
+      : [0, field('tspinSingle'), field('tspinDouble'), field('tspinTriple')][Math.min(lines, 3)];
   } else {
-    value = [0, base.single, base.double, base.triple, base.tetris][Math.min(lines, 4)];
+    value = [0, field('single'), field('double'), field('triple'), field('tetris')][Math.min(lines, 4)];
   }
   const difficult = lines === 4 || !!info.tspin;
-  if (difficult && info.b2bActive) value += t.b2b;
-  const comboIndex = Math.min(Math.max(0, Math.floor(info.combo || 0)), t.combo.length - 1);
-  value += t.combo[comboIndex] || 0;
-  if (info.perfect) value += base.perfectClear;
-  return Math.max(0, Math.round(value));
+  if (difficult && info.b2bActive) value += toFinite(t.b2b);
+  const combo = Array.isArray(t.combo) && t.combo.length ? t.combo : [0];
+  const comboIndex = Math.min(Math.max(0, Math.floor(toFinite(info.combo))), combo.length - 1);
+  value += toFinite(combo[comboIndex]);
+  if (info.perfect) value += field('perfectClear');
+  return Math.max(0, Math.round(toFinite(value)));
 }

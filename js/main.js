@@ -339,11 +339,13 @@ dom.panelBtn.addEventListener('click', () => togglePanel());
 dom.modeSelect.addEventListener('change', () => {
   settings.mode = dom.modeSelect.value;
   saveSettings(settings);
+  dom.modeSelect.blur();
   start();
 });
 dom.aiSelect.addEventListener('change', () => {
   settings.aiDifficulty = dom.aiSelect.value;
   saveSettings(settings);
+  dom.aiSelect.blur();
   refreshModeUi();
   if (settings.mode === 'vs') start();
 });
