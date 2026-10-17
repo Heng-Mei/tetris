@@ -1,8 +1,9 @@
 import { COLORS, PIECE_IDS } from './rotations.js';
-import { W, H, HIDDEN, VISIBLE, ghostY } from './engine.js';
+import { W, H, HIDDEN, VISIBLE, GARBAGE, ghostY } from './engine.js';
 
 const BG = '#0b0f16';
 const GRID = 'rgba(120, 150, 200, 0.08)';
+const GARBAGE_COLOR = '#5b6472';
 
 function roundRect(g, x, y, w, h, r) {
   g.beginPath();
@@ -41,6 +42,66 @@ function paintCell(g, px, py, size, color, ghost) {
   g.fill();
 }
 
+export function drawBoardInto(g, state, settings, system, cell, opts = {}) {
+  g.clearRect(0, 0, cell * W, cell * VISIBLE);
+  g.fillStyle = BG;
+  g.fillRect(0, 0, cell * W, cell * VISIBLE);
+
+  if (settings.grid) {
+    g.strokeStyle = GRID;
+    g.lineWidth = 1;
+    for (let x = 1; x < W; x++) {
+      g.beginPath();
+      g.moveTo(Math.round(x * cell) + 0.5, 0);
+      g.lineTo(Math.round(x * cell) + 0.5, cell * VISIBLE);
+      g.stroke();
+    }
+    for (let y = 1; y < VISIBLE; y++) {
+      g.beginPath();
+      g.moveTo(0, Math.round(y * cell) + 0.5);
+      g.lineTo(cell * W, Math.round(y * cell) + 0.5);
+      g.stroke();
+    }
+  }
+
+  // 已固定方块
+  for (let y = HIDDEN; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const v = state.board[y * W + x];
+      if (!v) continue;
+      const color = v === GARBAGE ? GARBAGE_COLOR : COLORS[PIECE_IDS[v - 1]];
+      paintCell(g, x * cell, (y - HIDDEN) * cell, cell, color, false);
+    }
+  }
+
+  const c = state.current;
+  if (c && state.status === 'playing') {
+    const showGhost = opts.ghost ?? settings.ghost;
+    const gy = ghostY(state, system);
+    if (showGhost && gy !== c.y) {
+      for (const [cx, cy] of system.shapes[c.type][c.r]) {
+        const y = gy + cy - HIDDEN;
+        if (y < 0) continue;
+        paintCell(g, (c.x + cx) * cell, y * cell, cell, COLORS[c.type], true);
+      }
+    }
+    g.save();
+    g.shadowColor = COLORS[c.type];
+    g.shadowBlur = cell * 0.45;
+    for (const [cx, cy] of system.shapes[c.type][c.r]) {
+      const y = c.y + cy - HIDDEN;
+      if (y < 0) continue;
+      paintCell(g, (c.x + cx) * cell, y * cell, cell, COLORS[c.type], false);
+    }
+    g.restore();
+  }
+
+  if (opts.flash > 0) {
+    g.fillStyle = `rgba(255,255,255,${(opts.flash / 140) * 0.1})`;
+    g.fillRect(0, 0, cell * W, cell * VISIBLE);
+  }
+}
+
 export function createRenderer({ board, hold, next }) {
   const ctx = board.getContext('2d');
   const holdCtx = hold.getContext('2d');
@@ -69,64 +130,6 @@ export function createRenderer({ board, hold, next }) {
     const slotW = miniCell * 4;
     setupCanvas(hold, slotW, miniCell * 3);
     setupCanvas(next, slotW, miniCell * 3 * 5);
-  }
-
-  function drawBoard(state, settings, system, opts = {}) {
-    const g = ctx;
-    g.clearRect(0, 0, cell * W, cell * VISIBLE);
-    g.fillStyle = BG;
-    g.fillRect(0, 0, cell * W, cell * VISIBLE);
-
-    if (settings.grid) {
-      g.strokeStyle = GRID;
-      g.lineWidth = 1;
-      for (let x = 1; x < W; x++) {
-        g.beginPath();
-        g.moveTo(Math.round(x * cell) + 0.5, 0);
-        g.lineTo(Math.round(x * cell) + 0.5, cell * VISIBLE);
-        g.stroke();
-      }
-      for (let y = 1; y < VISIBLE; y++) {
-        g.beginPath();
-        g.moveTo(0, Math.round(y * cell) + 0.5);
-        g.lineTo(cell * W, Math.round(y * cell) + 0.5);
-        g.stroke();
-      }
-    }
-
-    // 已固定方块
-    for (let y = HIDDEN; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const v = state.board[y * W + x];
-        if (v) paintCell(g, x * cell, (y - HIDDEN) * cell, cell, COLORS[PIECE_IDS[v - 1]], false);
-      }
-    }
-
-    const c = state.current;
-    if (c && state.status === 'playing') {
-      const gy = ghostY(state, system);
-      if (settings.ghost && gy !== c.y) {
-        for (const [cx, cy] of system.shapes[c.type][c.r]) {
-          const y = gy + cy - HIDDEN;
-          if (y < 0) continue;
-          paintCell(g, (c.x + cx) * cell, y * cell, cell, COLORS[c.type], true);
-        }
-      }
-      g.save();
-      g.shadowColor = COLORS[c.type];
-      g.shadowBlur = cell * 0.45;
-      for (const [cx, cy] of system.shapes[c.type][c.r]) {
-        const y = c.y + cy - HIDDEN;
-        if (y < 0) continue;
-        paintCell(g, (c.x + cx) * cell, y * cell, cell, COLORS[c.type], false);
-      }
-      g.restore();
-    }
-
-    if (opts.flash > 0) {
-      g.fillStyle = `rgba(255,255,255,${(opts.flash / 140) * 0.10})`;
-      g.fillRect(0, 0, cell * W, cell * VISIBLE);
-    }
   }
 
   function drawPieceInto(g, type, slotHeight, system, originY) {
@@ -165,12 +168,42 @@ export function createRenderer({ board, hold, next }) {
   return {
     resize,
     draw(state, settings, system, opts = {}) {
-      drawBoard(state, settings, system, opts);
+      drawBoardInto(ctx, state, settings, system, cell, opts);
       drawHold(state, system);
       drawNext(state, system);
     },
     get cell() {
       return cell;
+    },
+  };
+}
+
+export function createOpponentRenderer(canvas) {
+  const ctx = canvas.getContext('2d');
+  let cell = 13;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = 130;
+    cell = Math.floor(w / W);
+    const h = cell * VISIBLE;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  resize();
+
+  return {
+    resize,
+    draw(state, settings, system, opts = {}) {
+      if (!state) {
+        ctx.clearRect(0, 0, cell * W, cell * VISIBLE);
+        return;
+      }
+      drawBoardInto(ctx, state, settings, system, cell, { ...opts, ghost: false });
     },
   };
 }
