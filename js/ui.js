@@ -10,7 +10,7 @@ import {
 import { keyLabel } from './input.js';
 
 export function buildPanel(root, opts) {
-  const { settings, input, onChange, onClose, onSystemDirty, onEditRotation } = opts;
+  const { settings, input, onChange, onClose, onSystemDirty, onEditRotation, onEditAttack } = opts;
 
   function toast(message, ok = false) {
     const node = root.querySelector('.toast');
@@ -75,6 +75,12 @@ export function buildPanel(root, opts) {
           <h3>自定义旋转系统</h3>
           <p class="muted">图形化编辑 7 个方块的 4 个旋转状态、出生位置与踢墙表；导入/导出为 JSON 文件。</p>
           <button class="btn small" data-edit-rotation>打开编辑器</button>
+        </section>
+
+        <section class="pgroup">
+          <h3>攻击表</h3>
+          <p class="muted">消行攻击、T-Spin、combo、B2B 与 Perfect Clear；支持导入/导出 JSON 文件。</p>
+          <button class="btn small" data-edit-attack>打开编辑器</button>
         </section>
 
         <section class="pgroup">
@@ -155,6 +161,7 @@ export function buildPanel(root, opts) {
     });
 
     root.querySelector('[data-edit-rotation]').addEventListener('click', () => onEditRotation());
+    root.querySelector('[data-edit-attack]').addEventListener('click', () => onEditAttack());
 
     root.querySelector('[data-export]').addEventListener('click', () => exportSettings(settings));
 

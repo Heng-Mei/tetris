@@ -14,6 +14,7 @@ import { createHandling, press, release, tick, resetHandling, onRotate } from '.
 import { createInput } from './input.js';
 import { buildPanel } from './ui.js';
 import { createRotationEditor } from './rotation-editor.js';
+import { createAttackEditor } from './attack-editor.js';
 import { DEFAULT_BINDINGS, loadSettings, saveSettings, getSystem } from './settings.js';
 import { createRenderer, createOpponentRenderer } from './render.js';
 import { AI_PROFILES, choosePlacement } from './ai.js';
@@ -298,12 +299,20 @@ const editor = createRotationEditor({
   },
 });
 
+const attackEditor = createAttackEditor({
+  settings,
+  onApply() {
+    panelUi.render();
+  },
+});
+
 const panelUi = buildPanel(dom.panelBody, {
   settings,
   input,
   defaultBindings: DEFAULT_BINDINGS,
   onClose: () => togglePanel(false),
   onEditRotation: () => editor.open(),
+  onEditAttack: () => attackEditor.open(),
   onChange() {
     saveSettings(settings);
     system = getSystem(settings);

@@ -568,6 +568,12 @@ select {
 
 .muted.small { font-size: 10px; line-height: 1.5; margin: 0 0 4px; }
 
+.attack-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 18px;
+}
+
 .modal .toast { bottom: 72px; }
 
 @media (max-width: 900px) {
