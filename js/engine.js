@@ -4,6 +4,7 @@ export const W = 10;
 export const H = 22;
 export const HIDDEN = 2; // 顶部隐藏行
 export const VISIBLE = 20;
+export const GARBAGE = 8;
 
 const idx = (x, y) => y * W + x;
 
@@ -52,7 +53,46 @@ export function createGame() {
     lastAction: '',
     pendingIRS: null,
     pendingIHS: false,
+    lastGarbageHole: -1,
   };
+}
+
+export function isToppedOut(board) {
+  for (let y = 0; y < HIDDEN; y++) {
+    for (let x = 0; x < W; x++) if (board[y * W + x]) return true;
+  }
+  return false;
+}
+
+export function insertGarbage(state, lines, rng = Math.random) {
+  const n = Math.max(0, Math.min(Math.floor(lines), H));
+  if (!n) return { toppedOut: isToppedOut(state.board) };
+
+  let overflow = false;
+  for (let y = 0; y < n && !overflow; y++) {
+    for (let x = 0; x < W; x++) {
+      if (state.board[y * W + x]) {
+        overflow = true;
+        break;
+      }
+    }
+  }
+
+  state.board.copyWithin(0, n * W, H * W);
+  state.board.fill(0, (H - n) * W, H * W);
+
+  for (let i = 0; i < n; i++) {
+    let hole = Math.floor(Math.max(0, Math.min(0.999, rng())) * W);
+    if (hole === state.lastGarbageHole) hole = (hole + 1) % W;
+    state.lastGarbageHole = hole;
+    const row = (H - n + i) * W;
+    state.board.fill(GARBAGE, row, row + W);
+    state.board[row + hole] = 0;
+  }
+
+  const toppedOut = overflow || isToppedOut(state.board);
+  if (toppedOut) state.status = 'over';
+  return { toppedOut };
 }
 
 export function fillQueue(state) {
@@ -272,6 +312,7 @@ export function lockPiece(state, system, settings) {
   if (!c) return { lines: 0, points: 0, tspin: null };
 
   const tspin = detectTSpin(state);
+  const prevB2B = state.b2b;
   const color = PIECE_IDS.indexOf(c.type) + 1;
   for (const [cx, cy] of system.shapes[c.type][c.r]) {
     const x = c.x + cx;
@@ -280,6 +321,7 @@ export function lockPiece(state, system, settings) {
   }
 
   const lines = clearFullRows(state.board);
+  const perfect = state.board.every((v) => v === 0);
   const { points, difficult } = scoreClear(lines, tspin, state.level, state.combo, state.b2b);
 
   state.score += points;
@@ -296,7 +338,7 @@ export function lockPiece(state, system, settings) {
   state.status = 'spawning';
   state.spawnTimer = (lines > 0 ? settings.lineClearDelay : 0) + settings.are;
 
-  return { lines, points, tspin, level: state.level };
+  return { lines, points, tspin, level: state.level, perfect, combo: state.combo, b2bActive: prevB2B };
 }
 
 export function step(state, system, settings, dt, softDrop) {
