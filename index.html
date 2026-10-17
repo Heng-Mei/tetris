@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TETRIS · modern</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%230b0f16'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%235ad2f4'/%3E%3Crect x='8' y='3' width='4' height='4' fill='%23b07cff'/%3E%3Crect x='3' y='8' width='9' height='4' fill='%235ad2f4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">TETRIS<span>modern</span></div>
+      <div class="controls">
+        <button id="startBtn" class="btn primary">开始</button>
+        <button id="pauseBtn" class="btn">暂停</button>
+        <button id="restartBtn" class="btn">重开</button>
+        <button id="panelBtn" class="btn ghost">设置</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <aside class="side">
+        <section class="box">
+          <h2>HOLD</h2>
+          <canvas id="hold"></canvas>
+        </section>
+        <section class="box stats">
+          <div><span>分数</span><b id="score">0</b></div>
+          <div><span>消行</span><b id="lines">0</b></div>
+          <div><span>等级</span><b id="level">1</b></div>
+          <div><span>时间</span><b id="time">0:00</b></div>
+          <div><span>PPS</span><b id="pps">0.00</b></div>
+          <div><span>B2B</span><b id="b2b">—</b></div>
+        </section>
+      </aside>
+
+      <section class="board-wrap">
+        <canvas id="board" aria-label="游戏棋盘"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="overlay-card">
+            <h2 id="overlayTitle">准备好了？</h2>
+            <p id="overlayText"></p>
+            <button id="overlayBtn" class="btn primary">开始</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side right">
+        <section class="box">
+          <h2>NEXT</h2>
+          <canvas id="next"></canvas>
+        </section>
+        <section class="box hint">
+          <h2>手感</h2>
+          <p>键位、DAS、ARR、SDF、锁定延迟、重力、踢墙与旋转系统都在设置里。</p>
+          <p class="muted">设置会自动保存在本地。</p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <aside id="panel" class="panel" aria-hidden="true">
+    <div id="panelBody"></div>
+  </aside>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
