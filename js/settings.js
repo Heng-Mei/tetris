@@ -1,4 +1,5 @@
 import { PIECE_IDS, SYSTEMS, SRS } from './rotations.js';
+import { ATTACK_PRESETS, validateAttackTable } from './attack.js';
 
 export const STORAGE_KEY = 'tetris.settings.v1';
 
@@ -35,6 +36,9 @@ export const DEFAULT_SETTINGS = {
   rotationSystem: 'srs',
   rot180: 'two',
   customRotation: null,
+  mode: 'marathon',
+  aiDifficulty: 'normal',
+  attackTable: clone(ATTACK_PRESETS.guideline),
   bindings: { ...DEFAULT_BINDINGS },
 };
 
@@ -143,6 +147,13 @@ export function loadSettings() {
     if (!raw) return base;
     const saved = JSON.parse(raw);
     const merged = { ...base, ...saved, bindings: { ...base.bindings, ...(saved.bindings || {}) } };
+    if (!['marathon', 'sprint', 'blitz', 'vs'].includes(merged.mode)) merged.mode = 'marathon';
+    if (!['easy', 'normal', 'hard'].includes(merged.aiDifficulty)) merged.aiDifficulty = 'normal';
+    try {
+      merged.attackTable = validateAttackTable(merged.attackTable);
+    } catch {
+      merged.attackTable = clone(ATTACK_PRESETS.guideline);
+    }
     return merged;
   } catch {
     return base;
@@ -240,6 +251,9 @@ export function importSettings(settings, text) {
   const data = JSON.parse(text);
   if (!data || typeof data !== 'object') throw new Error('不是有效的设置文件');
   const next = { ...settings, ...data, bindings: { ...DEFAULT_BINDINGS, ...(data.bindings || {}) } };
+  if (!['marathon', 'sprint', 'blitz', 'vs'].includes(next.mode)) next.mode = 'marathon';
+  if (!['easy', 'normal', 'hard'].includes(next.aiDifficulty)) next.aiDifficulty = 'normal';
+  next.attackTable = validateAttackTable(next.attackTable || ATTACK_PRESETS.guideline);
   if (next.rotationSystem === 'custom' && next.customRotation) validateCustomRotation(next.customRotation);
   Object.assign(settings, next);
   saveSettings(settings);
