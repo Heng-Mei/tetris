@@ -526,6 +526,8 @@ select {
 
 .muted.small { font-size: 10px; line-height: 1.5; margin: 0 0 4px; }
 
+.modal .toast { bottom: 72px; }
+
 @media (max-width: 900px) {
   .app { padding: 12px; }
   .stage { gap: 12px; }

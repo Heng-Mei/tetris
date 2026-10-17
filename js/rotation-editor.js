@@ -224,6 +224,12 @@ export function createRotationEditor({ settings, onApply }) {
       row.querySelector('[data-dy]').addEventListener('input', (e) => {
         offsets[i][1] = clamp(Number(e.target.value), -3, 3);
       });
+      row.querySelector('[data-dx]').addEventListener('change', (e) => {
+        e.target.value = offsets[i][0];
+      });
+      row.querySelector('[data-dy]').addEventListener('change', (e) => {
+        e.target.value = offsets[i][1];
+      });
       row.querySelector('[data-remove]').addEventListener('click', () => {
         if (offsets.length === 1) {
           toast('至少保留一个偏移');
